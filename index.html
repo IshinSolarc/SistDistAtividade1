@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loja Web - E-Commerce</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f5f7fb;
+        color: #1f2937;
+      }
+      nav {
+        margin-bottom: 24px;
+      }
+      nav a {
+        text-decoration: none;
+        color: #1d4ed8;
+        font-weight: bold;
+        margin-right: 16px;
+      }
+      section {
+        background: white;
+        border: 1px solid #dfe7f1;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        max-width: 450px;
+        gap: 10px;
+      }
+      input, select, button {
+        padding: 10px;
+        font-size: 16px;
+      }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .produto {
+        border: 1px solid #dfe7f1;
+        border-radius: 8px;
+        padding: 12px;
+        background: #f9fbff;
+      }
+      a.link {
+        display: inline-block;
+        margin-top: 8px;
+        color: #0f766e;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Loja Web</h1>
+
+    <nav>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#checkout">Checkout</a>
+      <a href="#servicos">Serviços</a>
+    </nav>
+
+    <section id="catalogo">
+      <h2>Catálogo de Produtos</h2>
+      <div id="catalogoProdutos" class="catalogo"></div>
+      <a class="link" href="http://localhost:8000/catalogo" target="_blank">Consultar catálogo via API</a>
+    </section>
+
+    <section id="checkout">
+      <h2>Finalizar Compra</h2>
+      <form action="http://localhost:8000/confirmar-compra" method="POST">
+        <label for="nome">Nome:</label>
+        <input id="nome" name="nome" type="text" placeholder="Seu nome" required />
+
+        <label for="email">E-mail:</label>
+        <input id="email" name="email" type="email" placeholder="seu@email.com" required />
+
+        <label for="produto_id">Produto:</label>
+        <select id="produto_id" name="produto_id" required></select>
+
+        <label for="quantidade">Quantidade:</label>
+        <input id="quantidade" name="quantidade" type="number" min="1" value="1" required />
+
+        <label for="cep">CEP:</label>
+        <input id="cep" name="cep" type="text" placeholder="01001000" required />
+
+        <label for="numero_cartao">Número do cartão:</label>
+        <input id="numero_cartao" name="numero_cartao" type="text" placeholder="1234 5678 9012 3456" required />
+
+        <button type="submit">Confirmar compra</button>
+      </form>
+    </section>
+
+    <section id="servicos">
+      <h2>Web APIs</h2>
+      <div class="link-list">
+        <a class="link" href="http://localhost:8001/produtos" target="_blank">Produtos</a>
+        <a class="link" href="http://localhost:8002/cep?valor=01001000" target="_blank">CEP</a>
+        <a class="link" href="http://localhost:8003/notas" target="_blank">Fiscal</a>
+        <a class="link" href="http://localhost:8004/emails" target="_blank">Email</a>
+        <a class="link" href="http://localhost:8005/transacoes" target="_blank">Pagamento</a>
+        <a class="link" href="http://localhost:8006/entregas" target="_blank">Entrega</a>
+      </div>
+    </section>
+
+    <script>
+      async function carregarCatalogo() {
+        const container = document.getElementById('catalogoProdutos');
+        const select = document.getElementById('produto_id');
+
+        try {
+          const response = await fetch('http://localhost:8000/catalogo');
+          const data = await response.json();
+          const produtos = data.produtos || [];
+
+          if (!produtos.length) {
+            container.innerHTML = '<p>Nenhum produto encontrado.</p>';
+            return;
+          }
+
+          container.innerHTML = produtos.map((produto) => `
+            <div class="produto">
+              <strong>${produto.nome}</strong><br />
+              R$ ${Number(produto.preco).toFixed(2).replace('.', ',')}
+            </div>
+          `).join('');
+
+          select.innerHTML = produtos.map((produto) => `
+            <option value="${produto.id}">${produto.nome}</option>
+          `).join('');
+        } catch (error) {
+          container.innerHTML = '<p>Não foi possível carregar o catálogo.</p>';
+          console.error(error);
+        }
+      }
+
+      carregarCatalogo();
+    </script>
+  </body>
+</html>
